@@ -36,9 +36,14 @@ export const PublicationCard: React.FC<PublicationCardProps> = ({ publication })
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between text-sm text-muted-foreground">
-            <span className="font-medium">
-              {publication.profiles?.display_name || 'Autor Desconhecido'}
-            </span>
+            <div className="flex flex-col">
+              <span className="font-medium">
+                {publication.profiles?.display_name || 'Autor Desconhecido'}
+              </span>
+              <span className="text-xs">
+                {publication.profiles?.institution}
+              </span>
+            </div>
             <span>
               {formatDistanceToNow(new Date(publishedDate), {
                 addSuffix: true,

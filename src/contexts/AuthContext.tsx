@@ -8,6 +8,7 @@ interface AuthContextType {
   session: Session | null;
   profile: Profile | null;
   loading: boolean;
+  refreshProfile: () => Promise<void>;
   signUp: (email: string, password: string, userData: {
     full_name: string;
     institution: string;
@@ -128,6 +129,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { error };
   };
 
+  const refreshProfile = async () => {
+    if (!session?.user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .single();
+
+      if (error) {
+        console.error('Error fetching profile:', error);
+        return;
+      }
+
+      setProfile(data);
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
   const signOut = async () => {
     await supabase.auth.signOut();
   };
@@ -137,6 +159,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     session,
     profile,
     loading,
+    refreshProfile,
     signUp,
     signIn,
     signOut,

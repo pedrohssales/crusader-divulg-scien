@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Publication } from '@/types/database';
@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
-import { Check, X, RotateCcw, Eye } from 'lucide-react';
+import { Eye, ArrowRight } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import {
@@ -26,8 +26,6 @@ export const AdminPanel: React.FC = () => {
   const navigate = useNavigate();
   const [publications, setPublications] = useState<Publication[]>([]);
   const [loading, setLoading] = useState(true);
-  const [processingId, setProcessingId] = useState<string | null>(null);
-  const [justification, setJustification] = useState('');
   const [selectedPublication, setSelectedPublication] = useState<Publication | null>(null);
 
   // Redirect if not admin
@@ -53,7 +51,7 @@ export const AdminPanel: React.FC = () => {
           *,
           profiles (*)
         `)
-        .in('status', ['pending', 'returned'])
+        .eq('status', 'pending')
         .order('created_at', { ascending: true });
 
       if (error) {
@@ -69,74 +67,6 @@ export const AdminPanel: React.FC = () => {
     }
   };
 
-  const handleDecision = async (publicationId: string, decision: 'approved' | 'rejected' | 'returned') => {
-    if (!justification.trim()) {
-      toast({
-        title: 'Justificativa obrigatória',
-        description: 'Por favor, forneça uma justificativa para sua decisão.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    if (!profile) return;
-
-    setProcessingId(publicationId);
-
-    try {
-      // Update publication status
-      const { error: updateError } = await supabase
-        .from('publications')
-        .update({
-          status: decision,
-          published_at: decision === 'approved' ? new Date().toISOString() : null,
-        })
-        .eq('id', publicationId);
-
-      if (updateError) {
-        console.error('Error updating publication:', updateError);
-        toast({
-          title: 'Erro',
-          description: 'Erro ao atualizar publicação.',
-          variant: 'destructive',
-        });
-        return;
-      }
-
-      // Create review record
-      const { error: reviewError } = await supabase
-        .from('publication_reviews')
-        .insert([{
-          publication_id: publicationId,
-          reviewer_id: profile.id,
-          decision,
-          justification: justification.trim(),
-        }]);
-
-      if (reviewError) {
-        console.error('Error creating review:', reviewError);
-      }
-
-      toast({
-        title: 'Decisão registrada',
-        description: `Publicação ${decision === 'approved' ? 'aprovada' : decision === 'rejected' ? 'rejeitada' : 'devolvida'} com sucesso.`,
-      });
-
-      // Remove from list
-      setPublications(prev => prev.filter(p => p.id !== publicationId));
-      setJustification('');
-      setSelectedPublication(null);
-    } catch (error) {
-      console.error('Error:', error);
-      toast({
-        title: 'Erro',
-        description: 'Ocorreu um erro inesperado.',
-        variant: 'destructive',
-      });
-    } finally {
-      setProcessingId(null);
-    }
-  };
 
   if (!user || (profile && profile.user_type !== 'admin')) {
     return null; // Will redirect
@@ -186,103 +116,71 @@ export const AdminPanel: React.FC = () => {
         ) : (
           <div className="space-y-6">
             {publications.map((publication) => (
-              <Card key={publication.id}>
+              <Card key={publication.id} className="hover:shadow-md transition-shadow">
                 <CardHeader>
                   <div className="flex items-start justify-between">
-                    <div>
+                    <div className="flex-1">
                       <CardTitle className="text-xl mb-2">
                         {publication.title}
                       </CardTitle>
                       <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                        <span>{publication.profiles?.display_name}</span>
                         <span>
-                          {formatDistanceToNow(new Date(publication.created_at), {
+                          <strong>Autor:</strong> {publication.profiles?.display_name}
+                        </span>
+                        <span>
+                          <strong>Instituição:</strong> {publication.profiles?.institution}
+                        </span>
+                        <span>
+                          <strong>Enviada:</strong> {formatDistanceToNow(new Date(publication.created_at), {
                             addSuffix: true,
                             locale: ptBR,
                           })}
                         </span>
-                        <Badge variant={publication.status === 'pending' ? 'secondary' : 'outline'}>
-                          {publication.status === 'pending' ? 'Pendente' : 'Devolvido'}
+                        <Badge variant="secondary">
+                          Pendente
                         </Badge>
                       </div>
                     </div>
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setSelectedPublication(publication)}
-                        >
-                          <Eye className="h-4 w-4 mr-2" />
-                          Visualizar
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-                        <DialogHeader>
-                          <DialogTitle>{publication.title}</DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-4">
-                          <div className="bg-muted/50 rounded-lg p-4">
-                            <p className="text-sm font-medium mb-2">Resumo:</p>
-                            <p className="text-muted-foreground">{publication.summary}</p>
+                    <div className="flex items-center space-x-2 ml-4">
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setSelectedPublication(publication)}
+                          >
+                            <Eye className="h-4 w-4 mr-2" />
+                            Visualizar
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                          <DialogHeader>
+                            <DialogTitle>{publication.title}</DialogTitle>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            <div className="bg-muted/50 rounded-lg p-4">
+                              <p className="text-sm font-medium mb-2">Resumo:</p>
+                              <p className="text-muted-foreground">{publication.summary}</p>
+                            </div>
+                            <div className="prose prose-sm max-w-none">
+                              <div dangerouslySetInnerHTML={{ __html: publication.content }} />
+                            </div>
                           </div>
-                          <div className="prose prose-sm max-w-none">
-                            <div dangerouslySetInnerHTML={{ __html: publication.content }} />
-                          </div>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
+                        </DialogContent>
+                      </Dialog>
+                      <Button asChild>
+                        <Link to={`/admin/revisar/${publication.id}`}>
+                          <ArrowRight className="h-4 w-4 mr-2" />
+                          Revisar
+                        </Link>
+                      </Button>
+                    </div>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <p className="text-muted-foreground line-clamp-3">
-                      {publication.summary}
-                    </p>
-                  </div>
-
-                  <div className="space-y-3">
-                    <Label htmlFor={`justification-${publication.id}`}>
-                      Justificativa (obrigatório)
-                    </Label>
-                    <Textarea
-                      id={`justification-${publication.id}`}
-                      value={justification}
-                      onChange={(e) => setJustification(e.target.value)}
-                      placeholder="Forneça uma justificativa para sua decisão..."
-                      rows={3}
-                    />
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      onClick={() => handleDecision(publication.id, 'approved')}
-                      disabled={processingId === publication.id || !justification.trim()}
-                      size="sm"
-                      className="bg-green-600 hover:bg-green-700"
-                    >
-                      <Check className="h-4 w-4 mr-2" />
-                      Aprovar
-                    </Button>
-                    <Button
-                      onClick={() => handleDecision(publication.id, 'returned')}
-                      disabled={processingId === publication.id || !justification.trim()}
-                      variant="outline"
-                      size="sm"
-                    >
-                      <RotateCcw className="h-4 w-4 mr-2" />
-                      Devolver
-                    </Button>
-                    <Button
-                      onClick={() => handleDecision(publication.id, 'rejected')}
-                      disabled={processingId === publication.id || !justification.trim()}
-                      variant="destructive"
-                      size="sm"
-                    >
-                      <X className="h-4 w-4 mr-2" />
-                      Rejeitar
-                    </Button>
-                  </div>
+                <CardContent>
+                  <p className="text-muted-foreground line-clamp-3">
+                    {publication.summary}
+                  </p>
                 </CardContent>
               </Card>
             ))}

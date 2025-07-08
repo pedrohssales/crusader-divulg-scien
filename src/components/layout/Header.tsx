@@ -1,8 +1,9 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
-import { GraduationCap, User, LogOut, Settings, PlusCircle } from 'lucide-react';
+import { GraduationCap, User, LogOut, Settings, PlusCircle, Search, Menu, X, FileText } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,20 +15,46 @@ import {
 export const Header: React.FC = () => {
   const { user, profile, signOut } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const isActive = (path: string) => location.pathname === path;
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/busca?q=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery('');
+    }
+  };
 
   return (
     <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <Link to="/" className="flex items-center space-x-2">
           <GraduationCap className="h-8 w-8 text-primary" />
-          <div>
+          <div className="hidden sm:block">
             <h1 className="text-xl font-bold">Divulgação Científica</h1>
             <p className="text-xs text-muted-foreground">UFPE - Campus Caruaru</p>
           </div>
         </Link>
 
+        {/* Search bar - Desktop */}
+        <form onSubmit={handleSearch} className="hidden md:flex items-center flex-1 max-w-md mx-4">
+          <div className="relative w-full">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Buscar publicações..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 pr-4"
+            />
+          </div>
+        </form>
+
+        {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-6">
           <Link
             to="/"
@@ -55,7 +82,8 @@ export const Header: React.FC = () => {
           </Link>
         </nav>
 
-        <div className="flex items-center space-x-4">
+        {/* Desktop User Actions */}
+        <div className="hidden md:flex items-center space-x-4">
           {user ? (
             <>
               {profile?.user_type === 'admin' && (
@@ -86,6 +114,12 @@ export const Header: React.FC = () => {
                       Perfil
                     </Link>
                   </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/minhas-publicacoes">
+                      <FileText className="h-4 w-4 mr-2" />
+                      Minhas Publicações
+                    </Link>
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={signOut}>
                     <LogOut className="h-4 w-4 mr-2" />
@@ -100,7 +134,117 @@ export const Header: React.FC = () => {
             </Button>
           )}
         </div>
+
+        {/* Mobile Menu Button */}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="md:hidden"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        >
+          {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        </Button>
       </div>
+
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden border-t bg-background/95 backdrop-blur">
+          <div className="container mx-auto px-4 py-4 space-y-4">
+            {/* Search bar - Mobile */}
+            <form onSubmit={handleSearch} className="flex items-center">
+              <div className="relative w-full">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Buscar publicações..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 pr-4"
+                />
+              </div>
+            </form>
+
+            {/* Navigation Links */}
+            <nav className="flex flex-col space-y-2">
+              <Link
+                to="/"
+                className={`text-sm font-medium transition-colors hover:text-primary px-2 py-1 ${
+                  isActive('/') ? 'text-primary' : 'text-muted-foreground'
+                }`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Início
+              </Link>
+              <Link
+                to="/leituras"
+                className={`text-sm font-medium transition-colors hover:text-primary px-2 py-1 ${
+                  isActive('/leituras') ? 'text-primary' : 'text-muted-foreground'
+                }`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Leituras
+              </Link>
+              <Link
+                to="/sobre"
+                className={`text-sm font-medium transition-colors hover:text-primary px-2 py-1 ${
+                  isActive('/sobre') ? 'text-primary' : 'text-muted-foreground'
+                }`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Sobre
+              </Link>
+            </nav>
+
+            {/* User Actions - Mobile */}
+            {user ? (
+              <div className="space-y-2">
+                <Button asChild variant="outline" size="sm" className="w-full justify-start">
+                  <Link to="/nova-publicacao" onClick={() => setMobileMenuOpen(false)}>
+                    <PlusCircle className="h-4 w-4 mr-2" />
+                    Publicar
+                  </Link>
+                </Button>
+                {profile?.user_type === 'admin' && (
+                  <Button asChild variant="outline" size="sm" className="w-full justify-start">
+                    <Link to="/admin" onClick={() => setMobileMenuOpen(false)}>
+                      <Settings className="h-4 w-4 mr-2" />
+                      Admin
+                    </Link>
+                  </Button>
+                )}
+                <Button asChild variant="ghost" size="sm" className="w-full justify-start">
+                  <Link to="/perfil" onClick={() => setMobileMenuOpen(false)}>
+                    <User className="h-4 w-4 mr-2" />
+                    Perfil
+                  </Link>
+                </Button>
+                <Button asChild variant="ghost" size="sm" className="w-full justify-start">
+                  <Link to="/minhas-publicacoes" onClick={() => setMobileMenuOpen(false)}>
+                    <FileText className="h-4 w-4 mr-2" />
+                    Minhas Publicações
+                  </Link>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-start"
+                  onClick={() => {
+                    signOut();
+                    setMobileMenuOpen(false);
+                  }}
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sair
+                </Button>
+              </div>
+            ) : (
+              <Button asChild className="w-full">
+                <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>Entrar</Link>
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
     </header>
   );
 };
