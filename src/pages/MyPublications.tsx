@@ -11,6 +11,60 @@ import { FileText, Eye, Edit, Clock, CheckCircle, XCircle, RefreshCw } from 'luc
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
+const PublicationReviewFeedback: React.FC<{ publicationId: string; status: string }> = ({ publicationId, status }) => {
+  const [justification, setJustification] = useState<string>('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchReviewJustification();
+  }, [publicationId]);
+
+  const fetchReviewJustification = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('publication_reviews')
+        .select('justification')
+        .eq('publication_id', publicationId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (error) {
+        console.error('Error fetching review:', error);
+        return;
+      }
+
+      setJustification(data?.justification || '');
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="mt-4 p-3 bg-muted/50 rounded-lg">
+        <div className="animate-pulse">
+          <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
+          <div className="h-3 bg-muted rounded w-1/2"></div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-4 p-3 bg-muted/50 rounded-lg">
+      <p className="text-sm font-medium mb-1">
+        {status === 'returned' ? 'Devolvida para ajustes:' : 'Rejeitada:'}
+      </p>
+      <p className="text-sm text-muted-foreground">
+        {justification || 'Nenhuma justificativa foi fornecida.'}
+      </p>
+    </div>
+  );
+};
+
 export const MyPublications: React.FC = () => {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
@@ -207,14 +261,7 @@ export const MyPublications: React.FC = () => {
                   </p>
                   
                   {(publication.status === 'returned' || publication.status === 'rejected') && (
-                    <div className="mt-4 p-3 bg-muted/50 rounded-lg">
-                      <p className="text-sm font-medium mb-1">
-                        {publication.status === 'returned' ? 'Devolvida para ajustes:' : 'Rejeitada:'}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Confira o painel administrativo para ver a justificativa completa.
-                      </p>
-                    </div>
+                    <PublicationReviewFeedback publicationId={publication.id} status={publication.status} />
                   )}
                 </CardContent>
               </Card>

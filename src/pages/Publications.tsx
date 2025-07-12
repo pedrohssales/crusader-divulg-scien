@@ -8,9 +8,9 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
-const ITEMS_PER_PAGE = 1;
+const ITEMS_PER_PAGE = 3;
 
-export const Readings: React.FC = () => {
+export const Publications: React.FC = () => {
   const [publications, setPublications] = useState<Publication[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
@@ -81,7 +81,7 @@ export const Readings: React.FC = () => {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-3xl font-bold mb-4">Leituras Contínuas</h1>
+          <h1 className="text-3xl font-bold mb-4">Publicações</h1>
           <p className="text-muted-foreground">
             Nenhuma publicação aprovada encontrada para leitura.
           </p>
@@ -94,37 +94,46 @@ export const Readings: React.FC = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold">Leituras Contínuas</h1>
+          <h1 className="text-3xl font-bold">Publicações</h1>
           <div className="flex items-center space-x-2 text-sm text-muted-foreground">
             <span>{currentPage + 1} de {totalPages}</span>
           </div>
         </div>
 
-        {currentPublication && (
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="text-2xl mb-2">
-                {currentPublication.title}
-              </CardTitle>
-              <div className="flex items-center justify-between text-sm text-muted-foreground">
-                <span className="font-medium">
-                  Por {currentPublication.profiles?.display_name}
-                </span>
-                <span>
-                  {formatDistanceToNow(
-                    new Date(currentPublication.published_at || currentPublication.created_at),
-                    { addSuffix: true, locale: ptBR }
-                  )}
-                </span>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="prose prose-sm sm:prose-base lg:prose-lg xl:prose-xl max-w-none">
-                <div dangerouslySetInnerHTML={{ __html: currentPublication.content }} />
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        <div className="space-y-8 mb-8">
+          {publications
+            .slice(currentPage * ITEMS_PER_PAGE, (currentPage + 1) * ITEMS_PER_PAGE)
+            .map((publication) => (
+              <Card key={publication.id}>
+                <CardHeader>
+                  <CardTitle className="text-2xl mb-2">
+                    {publication.title}
+                  </CardTitle>
+                  <div className="flex items-center justify-between text-sm text-muted-foreground">
+                    <div>
+                      <span className="font-medium">
+                        Por {publication.profiles?.display_name}
+                      </span>
+                      {publication.profiles?.institution && (
+                        <span className="ml-2">• {publication.profiles.institution}</span>
+                      )}
+                    </div>
+                    <span>
+                      {formatDistanceToNow(
+                        new Date(publication.published_at || publication.created_at),
+                        { addSuffix: true, locale: ptBR }
+                      )}
+                    </span>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="prose prose-sm sm:prose-base lg:prose-lg xl:prose-xl max-w-none">
+                    <div dangerouslySetInnerHTML={{ __html: publication.content }} />
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+        </div>
 
         <div className="flex items-center justify-between">
           <Button

@@ -35,8 +35,8 @@ export const Header: React.FC = () => {
         <Link to="/" className="flex items-center space-x-2">
           <GraduationCap className="h-8 w-8 text-primary" />
           <div className="hidden sm:block">
-            <h1 className="text-xl font-bold">Divulgação Científica</h1>
-            <p className="text-xs text-muted-foreground">UFPE - Campus Caruaru</p>
+            <h1 className="text-xl font-bold">Vitrine Científica</h1>
+            <p className="text-xs text-muted-foreground">UFPE - CAA</p>
           </div>
         </Link>
 
@@ -65,12 +65,20 @@ export const Header: React.FC = () => {
             Início
           </Link>
           <Link
-            to="/leituras"
+            to="/publicacoes"
             className={`text-sm font-medium transition-colors hover:text-primary ${
-              isActive('/leituras') ? 'text-primary' : 'text-muted-foreground'
+              isActive('/publicacoes') ? 'text-primary' : 'text-muted-foreground'
             }`}
           >
-            Leituras
+            Publicações
+          </Link>
+          <Link
+            to="/como-publicar"
+            className={`text-sm font-medium transition-colors hover:text-primary ${
+              isActive('/como-publicar') ? 'text-primary' : 'text-muted-foreground'
+            }`}
+          >
+            Como Publicar
           </Link>
           <Link
             to="/sobre"
@@ -176,13 +184,22 @@ export const Header: React.FC = () => {
                 Início
               </Link>
               <Link
-                to="/leituras"
+                to="/publicacoes"
                 className={`text-sm font-medium transition-colors hover:text-primary px-2 py-1 ${
-                  isActive('/leituras') ? 'text-primary' : 'text-muted-foreground'
+                  isActive('/publicacoes') ? 'text-primary' : 'text-muted-foreground'
                 }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Leituras
+                Publicações
+              </Link>
+              <Link
+                to="/como-publicar"
+                className={`text-sm font-medium transition-colors hover:text-primary px-2 py-1 ${
+                  isActive('/como-publicar') ? 'text-primary' : 'text-muted-foreground'
+                }`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Como Publicar
               </Link>
               <Link
                 to="/sobre"

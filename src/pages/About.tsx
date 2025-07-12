@@ -7,9 +7,9 @@ export const About: React.FC = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">Sobre a Plataforma</h1>
+          <h1 className="text-4xl font-bold mb-4">Sobre a Vitrine Científica</h1>
           <p className="text-xl text-muted-foreground">
-            Divulgação Científica da UFPE - Campus Caruaru
+            Divulgação Científica da UFPE - Campus Acadêmico do Agreste
           </p>
         </div>
 
@@ -24,7 +24,7 @@ export const About: React.FC = () => {
             <CardContent>
               <p className="text-muted-foreground">
                 Promover a divulgação científica e facilitar o compartilhamento de 
-                conhecimento entre a comunidade acadêmica do Campus Caruaru da UFPE, 
+                conhecimento entre a comunidade acadêmica do Campus Acadêmico do Agreste da UFPE, 
                 tornando a ciência mais acessível e compreensível para todos.
               </p>
             </CardContent>
@@ -51,12 +51,12 @@ export const About: React.FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <GraduationCap className="h-5 w-5 text-primary" />
-              <span>UFPE - Campus Caruaru</span>
+              <span>UFPE - Campus Acadêmico do Agreste</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-muted-foreground">
-              O Campus Caruaru da Universidade Federal de Pernambuco foi criado em 2006 
+              O Campus Acadêmico do Agreste da Universidade Federal de Pernambuco foi criado em 2006 
               e desde então tem se destacado na região do Agreste pernambucano como um 
               centro de excelência em ensino, pesquisa e extensão.
             </p>
@@ -78,7 +78,7 @@ export const About: React.FC = () => {
           <CardContent>
             <ul className="space-y-2 text-muted-foreground">
               <li>• <strong>Pesquisadores:</strong> Compartilhem suas descobertas e estudos</li>
-              <li>• <strong>Estudantes:</strong> Divulguem projetos de iniciação científica e TCC</li>
+              <li>• <strong>Estudantes:</strong> Divulguem seus trabalhos, projetos de iniciação científica e TCC</li>
               <li>• <strong>Docentes:</strong> Publiquem reflexões e resultados de pesquisa</li>
               <li>• <strong>Comunidade:</strong> Acesse conhecimento científico de qualidade</li>
             </ul>
@@ -87,7 +87,7 @@ export const About: React.FC = () => {
 
         <div className="mt-12 text-center">
           <p className="text-muted-foreground">
-            Esta plataforma é uma iniciativa do Campus Caruaru da UFPE para fortalecer 
+            Esta plataforma é uma iniciativa do Campus Acadêmico do Agreste da UFPE para fortalecer 
             a cultura científica e promover o diálogo entre academia e sociedade.
           </p>
         </div>

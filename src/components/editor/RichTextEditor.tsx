@@ -5,6 +5,9 @@ import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
 import TextAlign from '@tiptap/extension-text-align';
 import FontFamily from '@tiptap/extension-font-family';
+import Color from '@tiptap/extension-color';
+import TextStyle from '@tiptap/extension-text-style';
+import Youtube from '@tiptap/extension-youtube';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -24,6 +27,11 @@ import {
   AlignRight,
   AlignJustify,
   Type,
+  Palette,
+  Video,
+  Heading1,
+  Heading2,
+  Heading3,
 } from 'lucide-react';
 
 interface RichTextEditorProps {
@@ -40,6 +48,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const editor = useEditor({
     extensions: [
       StarterKit,
+      TextStyle,
+      Color,
       Image.configure({
         HTMLAttributes: {
           class: 'max-w-full h-auto rounded-lg',
@@ -56,6 +66,10 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       }),
       FontFamily.configure({
         types: ['textStyle'],
+      }),
+      Youtube.configure({
+        controls: true,
+        nocookie: true,
       }),
     ],
     content,
@@ -83,6 +97,13 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     }
   };
 
+  const addYoutube = () => {
+    const url = window.prompt('URL do vídeo do YouTube:');
+    if (url && editor) {
+      editor.commands.setYoutubeVideo({ src: url });
+    }
+  };
+
   if (!editor) {
     return null;
   }
@@ -90,8 +111,35 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   return (
     <div className="border rounded-lg overflow-hidden">
       <div className="border-b p-2 space-y-2">
-        {/* Primeira linha - Formatação de texto */}
+        {/* Primeira linha - Títulos e formatação básica */}
         <div className="flex flex-wrap gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+            className={editor.isActive('heading', { level: 1 }) ? 'bg-muted' : ''}
+          >
+            <Heading1 className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+            className={editor.isActive('heading', { level: 2 }) ? 'bg-muted' : ''}
+          >
+            <Heading2 className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+            className={editor.isActive('heading', { level: 3 }) ? 'bg-muted' : ''}
+          >
+            <Heading3 className="h-4 w-4" />
+          </Button>
+          
+          <Separator orientation="vertical" className="h-8" />
+          
           <Button
             variant="ghost"
             size="sm"
@@ -140,11 +188,24 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
               <SelectItem value="'Times New Roman'">Times New Roman</SelectItem>
               <SelectItem value="'Courier New'">Courier New</SelectItem>
               <SelectItem value="Verdana">Verdana</SelectItem>
+              <SelectItem value="'Comic Sans MS'">Comic Sans MS</SelectItem>
+              <SelectItem value="Impact">Impact</SelectItem>
             </SelectContent>
           </Select>
+          
+          <input
+            type="color"
+            onInput={(event: React.FormEvent<HTMLInputElement>) => {
+              const target = event.target as HTMLInputElement;
+              editor.chain().focus().setColor(target.value).run();
+            }}
+            value={editor.getAttributes('textStyle').color || '#000000'}
+            className="w-8 h-8 border border-input rounded cursor-pointer"
+            title="Cor do texto"
+          />
         </div>
 
-        {/* Segunda linha - Alinhamento */}
+        {/* Segunda linha - Alinhamento e listas */}
         <div className="flex flex-wrap gap-1">
           <Button
             variant="ghost"
@@ -213,6 +274,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           </Button>
           <Button variant="ghost" size="sm" onClick={addImage}>
             <ImageIcon className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="sm" onClick={addYoutube}>
+            <Video className="h-4 w-4" />
           </Button>
           
           <Separator orientation="vertical" className="h-8" />
