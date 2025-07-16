@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Publication, PublicationReview } from '@/types/database';
+import { Publication, PublicationReview, PublicationAuthor } from '@/types/database';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -9,13 +9,15 @@ import { useAuth } from '@/contexts/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, FileText, Eye } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export const PublicationDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { user, profile } = useAuth();
   const [publication, setPublication] = useState<Publication | null>(null);
   const [reviews, setReviews] = useState<PublicationReview[]>([]);
+  const [authors, setAuthors] = useState<PublicationAuthor[]>([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
@@ -61,6 +63,17 @@ export const PublicationDetail: React.FC = () => {
 
       setPublication(data);
 
+      // Fetch additional authors
+      const { data: authorsData } = await supabase
+        .from('publication_authors')
+        .select('*')
+        .eq('publication_id', id)
+        .order('author_order');
+
+      if (authorsData) {
+        setAuthors(authorsData);
+      }
+
       // Fetch reviews if user is author or admin
       if (user && (data.profiles?.user_id === user.id || profile?.user_type === 'admin')) {
         fetchReviews();
@@ -92,6 +105,20 @@ export const PublicationDetail: React.FC = () => {
       setReviews(data || []);
     } catch (error) {
       console.error('Error:', error);
+    }
+  };
+
+  const getPublicUrl = (filePath: string) => {
+    const { data } = supabase.storage
+      .from('publications')
+      .getPublicUrl(filePath);
+    return data.publicUrl;
+  };
+
+  const viewPDF = () => {
+    if (publication?.file_path) {
+      const url = getPublicUrl(publication.file_path);
+      window.open(url, '_blank');
     }
   };
 
@@ -136,6 +163,11 @@ export const PublicationDetail: React.FC = () => {
     }
   };
 
+  const allAuthors = [
+    publication.profiles?.display_name || '',
+    ...authors.map(a => a.author_name)
+  ].filter(Boolean);
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-4xl mx-auto">
@@ -151,9 +183,9 @@ export const PublicationDetail: React.FC = () => {
             )}
           </div>
           
-          <div className="flex items-center justify-between text-muted-foreground mb-6">
+          <div className="flex items-center justify-between text-muted-foreground mb-4">
             <span className="font-medium">
-              Por {publication.profiles?.display_name}
+              Por {allAuthors.join(', ')}
             </span>
             <span>
               {formatDistanceToNow(
@@ -162,6 +194,14 @@ export const PublicationDetail: React.FC = () => {
               )}
             </span>
           </div>
+
+          {publication.keywords && (
+            <div className="mb-4">
+              <p className="text-sm text-muted-foreground">
+                <strong>Palavras-chave:</strong> {publication.keywords}
+              </p>
+            </div>
+          )}
 
           {publication.summary && (
             <div className="bg-muted/50 rounded-lg p-4 mb-6">
@@ -172,13 +212,43 @@ export const PublicationDetail: React.FC = () => {
           )}
         </div>
 
-        <Card className="mb-8">
-          <CardContent className="p-6">
-            <div className="prose prose-sm sm:prose-base lg:prose-lg xl:prose-xl max-w-none">
-              <div dangerouslySetInnerHTML={{ __html: publication.content }} />
-            </div>
-          </CardContent>
-        </Card>
+        {/* PDF Viewer */}
+        {publication.file_path ? (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <FileText className="h-5 w-5" />
+                <span>Documento</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <Button onClick={viewPDF} className="w-full">
+                  <Eye className="h-4 w-4 mr-2" />
+                  Visualizar PDF
+                </Button>
+                
+                {/* Embed PDF viewer */}
+                <div className="w-full h-96 border rounded-lg overflow-hidden">
+                  <iframe
+                    src={`${getPublicUrl(publication.file_path)}#toolbar=1&navpanes=1&scrollbar=1`}
+                    className="w-full h-full"
+                    title="PDF Viewer"
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="mb-8">
+            <CardContent className="p-6">
+              <div className="text-center text-muted-foreground">
+                <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>Nenhum arquivo PDF disponível para esta publicação.</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Reviews section - only visible to author and admin */}
         {reviews.length > 0 && (

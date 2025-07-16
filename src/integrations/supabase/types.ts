@@ -50,6 +50,38 @@ export type Database = {
         }
         Relationships: []
       }
+      publication_authors: {
+        Row: {
+          author_name: string
+          author_order: number
+          created_at: string
+          id: string
+          publication_id: string
+        }
+        Insert: {
+          author_name: string
+          author_order: number
+          created_at?: string
+          id?: string
+          publication_id: string
+        }
+        Update: {
+          author_name?: string
+          author_order?: number
+          created_at?: string
+          id?: string
+          publication_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "publication_authors_publication_id_fkey"
+            columns: ["publication_id"]
+            isOneToOne: false
+            referencedRelation: "publications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       publication_reviews: {
         Row: {
           created_at: string
@@ -97,7 +129,9 @@ export type Database = {
           author_id: string
           content: string
           created_at: string
+          file_path: string | null
           id: string
+          keywords: string | null
           published_at: string | null
           status: Database["public"]["Enums"]["publication_status"]
           summary: string
@@ -108,7 +142,9 @@ export type Database = {
           author_id: string
           content: string
           created_at?: string
+          file_path?: string | null
           id?: string
+          keywords?: string | null
           published_at?: string | null
           status?: Database["public"]["Enums"]["publication_status"]
           summary: string
@@ -119,7 +155,9 @@ export type Database = {
           author_id?: string
           content?: string
           created_at?: string
+          file_path?: string | null
           id?: string
+          keywords?: string | null
           published_at?: string | null
           status?: Database["public"]["Enums"]["publication_status"]
           summary?: string

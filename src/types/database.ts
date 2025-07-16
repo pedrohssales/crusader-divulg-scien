@@ -19,12 +19,22 @@ export interface Publication {
   title: string;
   summary: string;
   content: string;
+  keywords?: string;
+  file_path?: string;
   status: PublicationStatus;
   author_id: string;
   published_at: string | null;
   created_at: string;
   updated_at: string;
   profiles?: Profile;
+}
+
+export interface PublicationAuthor {
+  id: string;
+  publication_id: string;
+  author_name: string;
+  author_order: number;
+  created_at: string;
 }
 
 export interface PublicationReview {

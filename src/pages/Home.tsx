@@ -52,11 +52,11 @@ export const Home: React.FC = () => {
             Plataforma de Divulgação Científica
           </h1>
           <p className="text-xl text-muted-foreground">
-            UFPE - Campus Caruaru
+            UFPE - Campus Acadêmico do Agreste
           </p>
           <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
             Descubra as mais recentes pesquisas e publicações científicas desenvolvidas
-            no campus Caruaru da Universidade Federal de Pernambuco.
+            no Campus Acadêmico do Agreste da Universidade Federal de Pernambuco.
           </p>
         </div>
 

@@ -94,7 +94,9 @@ export const HowToPublish: React.FC = () => {
         "Clique em 'Nova Publicação' no menu",
         "Adicione um título chamativo e informativo",
         "Escreva um resumo claro do seu trabalho",
-        "Use o editor para formatar seu texto com imagens, vídeos e links",
+        "Adicione palavras-chave relevantes",
+        "Inclua outros autores se houver",
+        "Faça upload do arquivo PDF do seu trabalho",
         "Revise cuidadosamente antes de enviar"
       ]
     },

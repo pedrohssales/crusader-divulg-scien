@@ -8,7 +8,7 @@ export const Footer: React.FC = () => {
         <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
           <div className="text-center md:text-left">
             <p className="text-sm text-muted-foreground">
-              © 2024 Vitrine Científica - UFPE Campus Acadêmico do Agreste
+              © 2025 Vitrine Científica - UFPE Campus Acadêmico do Agreste
             </p>
           </div>
           
