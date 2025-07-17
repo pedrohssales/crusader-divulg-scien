@@ -47,14 +47,14 @@ export const Home: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">
+        <div className="text-center mb-16 space-y-6">
+          <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-primary via-primary to-primary/70 bg-clip-text text-transparent leading-tight">
             Plataforma de Divulgação Científica
           </h1>
-          <p className="text-xl text-muted-foreground">
+          <p className="text-xl md:text-2xl text-foreground/80 font-medium">
             UFPE - Campus Acadêmico do Agreste
           </p>
-          <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
+          <p className="mt-6 text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
             Descubra as mais recentes pesquisas e publicações científicas desenvolvidas
             no Campus Acadêmico do Agreste da Universidade Federal de Pernambuco.
           </p>

@@ -33,15 +33,21 @@ export const Header: React.FC = () => {
     <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <Link to="/" className="flex items-center space-x-2">
-          <GraduationCap className="h-8 w-8 text-primary" />
+          <img 
+            src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/graduation-cap.svg" 
+            alt="Logo" 
+            className="h-8 w-8 text-primary"
+          />
           <div className="hidden sm:block">
-            <h1 className="text-xl font-bold">Vitrine Científica</h1>
+            <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+              Vitrine Científica
+            </h1>
             <p className="text-xs text-muted-foreground">UFPE - CAA</p>
           </div>
         </Link>
 
         {/* Search bar - Desktop */}
-        <form onSubmit={handleSearch} className="hidden md:flex items-center flex-1 max-w-md mx-4">
+        <form onSubmit={handleSearch} className="hidden md:flex items-center flex-1 max-w-sm mx-4">
           <div className="relative w-full">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input

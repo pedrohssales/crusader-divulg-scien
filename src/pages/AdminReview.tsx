@@ -247,10 +247,30 @@ export const AdminReview: React.FC = () => {
               </div>
               
               <div>
-                <p className="text-sm font-medium mb-4">Conteúdo:</p>
-                <div className="prose prose-sm max-w-none bg-background border rounded-lg p-6">
-                  <div dangerouslySetInnerHTML={{ __html: publication.content }} />
-                </div>
+                <p className="text-sm font-medium mb-4">Arquivo PDF:</p>
+                {publication.file_path ? (
+                  <div className="border rounded-lg overflow-hidden bg-background">
+                    <iframe
+                      src={`https://byhpptibkfffcvlhlsjp.supabase.co/storage/v1/object/public/publications/${publication.file_path}`}
+                      className="w-full h-96"
+                      title="Visualizar PDF"
+                    />
+                    <div className="p-3 border-t bg-muted/50">
+                      <a
+                        href={`https://byhpptibkfffcvlhlsjp.supabase.co/storage/v1/object/public/publications/${publication.file_path}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-primary hover:underline"
+                      >
+                        Abrir PDF em nova aba
+                      </a>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="border rounded-lg p-6 text-center text-muted-foreground">
+                    Nenhum arquivo PDF foi enviado
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

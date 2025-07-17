@@ -78,7 +78,7 @@ export const About: React.FC = () => {
           <CardContent>
             <ul className="space-y-2 text-muted-foreground">
               <li>• <strong>Pesquisadores:</strong> Compartilhem suas descobertas e estudos</li>
-              <li>• <strong>Estudantes:</strong> Divulguem seus trabalhos, projetos de iniciação científica e TCC</li>
+              <li>• <strong>Estudantes:</strong> Divulguem seus trabalhos</li>
               <li>• <strong>Docentes:</strong> Publiquem reflexões e resultados de pesquisa</li>
               <li>• <strong>Comunidade:</strong> Acesse conhecimento científico de qualidade</li>
             </ul>
