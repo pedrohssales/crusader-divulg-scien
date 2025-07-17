@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSiteConfig } from '@/hooks/useSiteConfig';
 import { GraduationCap, User, LogOut, Settings, PlusCircle, Search, Menu, X, FileText } from 'lucide-react';
 import {
   DropdownMenu,
@@ -14,6 +15,7 @@ import {
 
 export const Header: React.FC = () => {
   const { user, profile, signOut } = useAuth();
+  const { config } = useSiteConfig();
   const location = useLocation();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
@@ -34,7 +36,7 @@ export const Header: React.FC = () => {
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <Link to="/" className="flex items-center space-x-2">
           <img 
-            src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/graduation-cap.svg" 
+            src={config?.logo_url || "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/graduation-cap.svg"} 
             alt="Logo" 
             className="h-8 w-8 text-primary"
           />
