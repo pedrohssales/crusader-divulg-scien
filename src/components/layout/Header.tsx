@@ -38,7 +38,7 @@ export const Header: React.FC = () => {
           <img 
             src={config?.logo_url || "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/graduation-cap.svg"} 
             alt="Logo" 
-            className="h-8 w-8 text-primary"
+            className="h-10 w-10 text-primary"
           />
           <div className="hidden sm:block">
             <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
