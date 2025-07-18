@@ -15,6 +15,7 @@ import { NewPublication } from "@/pages/NewPublication";
 import { EditPublication } from "@/pages/EditPublication";
 import { AdminPanel } from "@/pages/AdminPanel";
 import { AdminReview } from "@/pages/AdminReview";
+import { RetainedPublications } from "@/pages/RetainedPublications";
 import { Profile } from "@/pages/Profile";
 import { MyPublications } from "@/pages/MyPublications";
 import { SearchResults } from "@/pages/SearchResults";
@@ -45,8 +46,9 @@ const App = () => (
                <Route path="/publicacao/:id" element={<PublicationDetail />} />
                <Route path="/nova-publicacao" element={<NewPublication />} />
                <Route path="/editar-publicacao/:id" element={<EditPublication />} />
-               <Route path="/admin" element={<AdminPanel />} />
-               <Route path="/admin/revisar/:id" element={<AdminReview />} />
+                <Route path="/admin" element={<AdminPanel />} />
+                <Route path="/admin/revisar/:id" element={<AdminReview />} />
+                <Route path="/admin/retidas" element={<RetainedPublications />} />
                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

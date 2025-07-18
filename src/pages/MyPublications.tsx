@@ -56,7 +56,8 @@ const PublicationReviewFeedback: React.FC<{ publicationId: string; status: strin
   return (
     <div className="mt-4 p-3 bg-muted/50 rounded-lg">
       <p className="text-sm font-medium mb-1">
-        {status === 'returned' ? 'Devolvida para ajustes:' : 'Rejeitada:'}
+        {status === 'returned' ? 'Devolvida para ajustes:' : 
+         status === 'retained' ? 'Retida:' : 'Rejeitada:'}
       </p>
       <p className="text-sm text-muted-foreground">
         {justification || 'Nenhuma justificativa foi fornecida.'}
@@ -145,6 +146,13 @@ export const MyPublications: React.FC = () => {
           <Badge variant="outline">
             <Edit className="h-3 w-3 mr-1" />
             Rascunho
+          </Badge>
+        );
+      case 'retained':
+        return (
+          <Badge variant="destructive">
+            <XCircle className="h-3 w-3 mr-1" />
+            Retida
           </Badge>
         );
       default:
@@ -260,7 +268,7 @@ export const MyPublications: React.FC = () => {
                     {publication.summary}
                   </p>
                   
-                  {(publication.status === 'returned' || publication.status === 'rejected') && (
+                  {(publication.status === 'returned' || publication.status === 'rejected' || publication.status === 'retained') && (
                     <PublicationReviewFeedback publicationId={publication.id} status={publication.status} />
                   )}
                 </CardContent>

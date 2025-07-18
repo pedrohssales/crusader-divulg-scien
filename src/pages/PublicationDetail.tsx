@@ -9,8 +9,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle, FileText, Eye } from 'lucide-react';
+import { AlertCircle, FileText, Eye, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
 
 export const PublicationDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -20,6 +24,8 @@ export const PublicationDetail: React.FC = () => {
   const [authors, setAuthors] = useState<PublicationAuthor[]>([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [retentionReason, setRetentionReason] = useState('');
+  const [isRetaining, setIsRetaining] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -108,6 +114,57 @@ export const PublicationDetail: React.FC = () => {
     }
   };
 
+  const handleRetainPublication = async () => {
+    if (!retentionReason.trim()) {
+      toast.error('Por favor, forneça um motivo para a retenção.');
+      return;
+    }
+
+    if (!profile || !publication) return;
+
+    setIsRetaining(true);
+
+    try {
+      // Update publication status to retained
+      const { error: updateError } = await supabase
+        .from('publications')
+        .update({
+          status: 'retained',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', publication.id);
+
+      if (updateError) {
+        console.error('Error retaining publication:', updateError);
+        toast.error('Erro ao reter publicação.');
+        return;
+      }
+
+      // Create review record for retention
+      const { error: reviewError } = await supabase
+        .from('publication_reviews')
+        .insert([{
+          publication_id: publication.id,
+          reviewer_id: profile.id,
+          decision: 'retained',
+          justification: retentionReason.trim(),
+        }]);
+
+      if (reviewError) {
+        console.error('Error creating retention review:', reviewError);
+      }
+
+      toast.success('Publicação retida com sucesso.');
+      setRetentionReason('');
+      fetchPublication(); // Refresh publication data
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Erro ao reter publicação.');
+    } finally {
+      setIsRetaining(false);
+    }
+  };
+
   const getPublicUrl = (filePath: string) => {
     const { data } = supabase.storage
       .from('publications')
@@ -159,6 +216,7 @@ export const PublicationDetail: React.FC = () => {
       case 'rejected': return 'Rejeitado';
       case 'returned': return 'Devolvido';
       case 'draft': return 'Rascunho';
+      case 'retained': return 'Retida';
       default: return status;
     }
   };
@@ -176,11 +234,57 @@ export const PublicationDetail: React.FC = () => {
             <h1 className="text-3xl font-bold leading-tight">
               {publication.title}
             </h1>
-            {publication.status !== 'approved' && (
-              <Badge variant={getStatusColor(publication.status)}>
-                {getStatusText(publication.status)}
-              </Badge>
-            )}
+            <div className="flex items-center space-x-2">
+              {publication.status !== 'approved' && (
+                <Badge variant={getStatusColor(publication.status)}>
+                  {getStatusText(publication.status)}
+                </Badge>
+              )}
+              {/* Retain button for admins on approved publications */}
+              {publication.status === 'approved' && profile?.user_type === 'admin' && (
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="destructive" size="sm">
+                        <AlertTriangle className="h-4 w-4 mr-2" />
+                        Reter Publicação
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Reter Publicação</DialogTitle>
+                        <DialogDescription>
+                          Esta ação irá remover a publicação do acesso público. 
+                          Forneça um motivo claro para a retenção.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="retention-reason">Motivo da Retenção</Label>
+                          <Textarea
+                            id="retention-reason"
+                            value={retentionReason}
+                            onChange={(e) => setRetentionReason(e.target.value)}
+                            placeholder="Explique o motivo para reter esta publicação..."
+                            rows={4}
+                          />
+                        </div>
+                        <div className="flex justify-end space-x-2">
+                          <DialogTrigger asChild>
+                            <Button variant="outline">Cancelar</Button>
+                          </DialogTrigger>
+                          <Button 
+                            variant="destructive" 
+                            onClick={handleRetainPublication}
+                            disabled={isRetaining || !retentionReason.trim()}
+                          >
+                            {isRetaining ? 'Retendo...' : 'Reter Publicação'}
+                          </Button>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                )}
+            </div>
           </div>
           
           <div className="flex items-center justify-between text-muted-foreground mb-4">

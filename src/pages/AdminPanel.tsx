@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
-import { Eye, ArrowRight } from 'lucide-react';
+import { Eye, ArrowRight, AlertTriangle, BarChart3 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import {
@@ -25,6 +25,7 @@ export const AdminPanel: React.FC = () => {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
   const [publications, setPublications] = useState<Publication[]>([]);
+  const [retainedCount, setRetainedCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [selectedPublication, setSelectedPublication] = useState<Publication | null>(null);
 
@@ -40,6 +41,7 @@ export const AdminPanel: React.FC = () => {
   useEffect(() => {
     if (profile?.user_type === 'admin') {
       fetchPendingPublications();
+      fetchRetainedCount();
     }
   }, [profile]);
 
@@ -67,6 +69,23 @@ export const AdminPanel: React.FC = () => {
     }
   };
 
+  const fetchRetainedCount = async () => {
+    try {
+      const { count, error } = await supabase
+        .from('publications')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'retained');
+
+      if (error) {
+        console.error('Error fetching retained count:', error);
+        return;
+      }
+
+      setRetainedCount(count || 0);
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
 
   if (!user || (profile && profile.user_type !== 'admin')) {
     return null; // Will redirect
@@ -97,12 +116,63 @@ export const AdminPanel: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold">Painel Administrativo</h1>
-          <Badge variant="secondary">
-            {publications.length} publicações pendentes
-          </Badge>
+          <div className="flex items-center space-x-4">
+            <Badge variant="secondary">
+              {publications.length} pendentes
+            </Badge>
+            <Button asChild variant="outline">
+              <Link to="/admin/retidas">
+                <AlertTriangle className="h-4 w-4 mr-2" />
+                Retidas ({retainedCount})
+              </Link>
+            </Button>
+          </div>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Pendentes</CardTitle>
+              <BarChart3 className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{publications.length}</div>
+              <p className="text-xs text-muted-foreground">
+                Publicações aguardando revisão
+              </p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Retidas</CardTitle>
+              <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{retainedCount}</div>
+              <p className="text-xs text-muted-foreground">
+                Publicações retiradas do público
+              </p>
+            </CardContent>
+          </Card>
+          
+          <Card className="md:col-span-1">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Ações Rápidas</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <Button asChild variant="outline" size="sm" className="w-full">
+                <Link to="/admin/retidas">
+                  <AlertTriangle className="h-4 w-4 mr-2" />
+                  Gerenciar Retidas
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
         </div>
 
         {publications.length === 0 ? (

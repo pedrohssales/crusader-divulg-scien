@@ -1,6 +1,6 @@
 export type UserType = 'standard' | 'admin';
 
-export type PublicationStatus = 'draft' | 'pending' | 'approved' | 'rejected' | 'returned';
+export type PublicationStatus = 'draft' | 'pending' | 'approved' | 'rejected' | 'returned' | 'retained';
 
 export interface Profile {
   id: string;
