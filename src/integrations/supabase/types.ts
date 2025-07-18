@@ -212,6 +212,7 @@ export type Database = {
         | "approved"
         | "rejected"
         | "returned"
+        | "retained"
       user_type: "standard" | "admin"
     }
     CompositeTypes: {
@@ -346,6 +347,7 @@ export const Constants = {
         "approved",
         "rejected",
         "returned",
+        "retained",
       ],
       user_type: ["standard", "admin"],
     },
