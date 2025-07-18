@@ -16,6 +16,7 @@ import { EditPublication } from "@/pages/EditPublication";
 import { AdminPanel } from "@/pages/AdminPanel";
 import { AdminReview } from "@/pages/AdminReview";
 import { RetainedPublications } from "@/pages/RetainedPublications";
+import { AuditLog } from "@/pages/AuditLog";
 import { Profile } from "@/pages/Profile";
 import { MyPublications } from "@/pages/MyPublications";
 import { SearchResults } from "@/pages/SearchResults";
@@ -49,6 +50,7 @@ const App = () => (
                 <Route path="/admin" element={<AdminPanel />} />
                 <Route path="/admin/revisar/:id" element={<AdminReview />} />
                 <Route path="/admin/retidas" element={<RetainedPublications />} />
+                <Route path="/admin/auditoria" element={<AuditLog />} />
                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

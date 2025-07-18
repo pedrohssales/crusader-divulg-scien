@@ -2,6 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Publication, PublicationReview, PublicationAuthor } from '@/types/database';
+
+interface ReviewWithProfile extends PublicationReview {
+  profiles?: {
+    display_name: string;
+    full_name: string;
+  };
+}
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -20,7 +27,7 @@ export const PublicationDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { user, profile } = useAuth();
   const [publication, setPublication] = useState<Publication | null>(null);
-  const [reviews, setReviews] = useState<PublicationReview[]>([]);
+  const [reviews, setReviews] = useState<ReviewWithProfile[]>([]);
   const [authors, setAuthors] = useState<PublicationAuthor[]>([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -98,7 +105,7 @@ export const PublicationDetail: React.FC = () => {
         .from('publication_reviews')
         .select(`
           *,
-          profiles (display_name)
+          profiles!publication_reviews_reviewer_id_fkey (display_name, full_name)
         `)
         .eq('publication_id', id)
         .order('created_at', { ascending: false });
@@ -205,6 +212,7 @@ export const PublicationDetail: React.FC = () => {
       case 'pending': return 'secondary';
       case 'rejected': return 'destructive';
       case 'returned': return 'outline';
+      case 'retained': return 'destructive';
       default: return 'secondary';
     }
   };
@@ -216,7 +224,7 @@ export const PublicationDetail: React.FC = () => {
       case 'rejected': return 'Rejeitado';
       case 'returned': return 'Devolvido';
       case 'draft': return 'Rascunho';
-      case 'retained': return 'Retida';
+      case 'retained': return 'Retido';
       default: return status;
     }
   };
@@ -367,9 +375,17 @@ export const PublicationDetail: React.FC = () => {
                   <AlertDescription>
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <Badge variant={getStatusColor(review.decision)}>
-                          {getStatusText(review.decision)}
-                        </Badge>
+                        <div className="flex items-center space-x-2">
+                          <Badge variant={getStatusColor(review.decision)}>
+                            {getStatusText(review.decision)}
+                          </Badge>
+                          {/* Show reviewer info only to admins */}
+                          {profile?.user_type === 'admin' && review.profiles && (
+                            <span className="text-xs text-muted-foreground">
+                              por {review.profiles.display_name || review.profiles.full_name}
+                            </span>
+                          )}
+                        </div>
                         <span className="text-sm text-muted-foreground">
                           {formatDistanceToNow(new Date(review.created_at), {
                             addSuffix: true,

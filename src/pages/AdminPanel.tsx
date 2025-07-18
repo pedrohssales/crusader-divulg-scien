@@ -171,6 +171,12 @@ export const AdminPanel: React.FC = () => {
                   Gerenciar Retidas
                 </Link>
               </Button>
+              <Button asChild variant="outline" size="sm" className="w-full">
+                <Link to="/admin/auditoria">
+                  <BarChart3 className="h-4 w-4 mr-2" />
+                  Log de Auditoria
+                </Link>
+              </Button>
             </CardContent>
           </Card>
         </div>
