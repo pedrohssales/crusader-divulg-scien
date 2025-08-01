@@ -21,6 +21,7 @@ export interface Publication {
   content: string;
   keywords?: string;
   file_path?: string;
+  docx_file_path?: string;
   status: PublicationStatus;
   author_id: string;
   published_at: string | null;

@@ -16,7 +16,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle, FileText, Eye, AlertTriangle } from 'lucide-react';
+import { AlertCircle, FileText, Eye, AlertTriangle, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
@@ -186,6 +186,13 @@ export const PublicationDetail: React.FC = () => {
     }
   };
 
+  const downloadDocx = () => {
+    if (publication?.docx_file_path) {
+      const url = getPublicUrl(publication.docx_file_path);
+      window.open(url, '_blank');
+    }
+  };
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -335,10 +342,20 @@ export const PublicationDetail: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <Button onClick={viewPDF} className="w-full">
-                  <Eye className="h-4 w-4 mr-2" />
-                  Visualizar PDF
-                </Button>
+                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                  <Button onClick={viewPDF} className="flex-1">
+                    <Eye className="h-4 w-4 mr-2" />
+                    Visualizar PDF
+                  </Button>
+                  
+                  {/* DOCX download button - only for admins and authors */}
+                  {publication.docx_file_path && (profile?.user_type === 'admin' || publication.profiles?.user_id === user?.id) && (
+                    <Button onClick={downloadDocx} variant="outline" className="flex-1 sm:flex-none">
+                      <Download className="h-4 w-4 mr-2" />
+                      Download DOCX
+                    </Button>
+                  )}
+                </div>
                 
                 {/* Embed PDF viewer */}
                 <div className="w-full h-96 border rounded-lg overflow-hidden">

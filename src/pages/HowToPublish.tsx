@@ -53,7 +53,7 @@ export const HowToPublish: React.FC = () => {
       },
       {
         title: "Formato do Arquivo",
-        content: "O envio deve ser obrigatoriamente em formato Word (.docx). Trabalhos que não obedecerem a formatação não serão aceitos.",
+        content: "O envio deve ser obrigatoriamente em formato PDF (.pdf) e formato Word (.docx). Ambos os arquivos são obrigatórios. Trabalhos que não obedecerem a formatação não serão aceitos.",
         priority: "high"
       },
       {
@@ -262,7 +262,7 @@ export const HowToPublish: React.FC = () => {
               <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
               <div>
                 <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-1">
-                  Normas UFPE - Campus Acadêmico do Agreste
+                  Normas para Publicação na Plataforma
                 </h3>
                 <p className="text-sm text-blue-800 dark:text-blue-200">
                   Todas as publicações devem seguir rigorosamente estas normas de formatação. 

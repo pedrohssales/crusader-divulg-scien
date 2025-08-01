@@ -21,6 +21,7 @@ export const NewPublication: React.FC = () => {
   });
   const [additionalAuthors, setAdditionalAuthors] = useState<string[]>(['']);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedDocxFile, setSelectedDocxFile] = useState<File | null>(null);
 
   // Redirect if not authenticated
   React.useEffect(() => {
@@ -75,16 +76,40 @@ export const NewPublication: React.FC = () => {
     }
   };
 
-  const uploadFile = async (publicationId: string): Promise<string | null> => {
-    if (!selectedFile) return null;
+  const handleDocxFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.type !== 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+        toast({
+          title: 'Arquivo inválido',
+          description: 'Por favor, selecione apenas arquivos DOCX.',
+          variant: 'destructive',
+        });
+        return;
+      }
+      if (file.size > 1 * 1024 * 1024) { // 1MB limit
+        toast({
+          title: 'Arquivo muito grande',
+          description: 'O arquivo DOCX deve ter no máximo 1MB.',
+          variant: 'destructive',
+        });
+        return;
+      }
+      setSelectedDocxFile(file);
+    }
+  };
 
-    const fileExt = 'pdf';
-    const fileName = `${publicationId}.${fileExt}`;
+  const uploadFile = async (publicationId: string, fileType: 'pdf' | 'docx'): Promise<string | null> => {
+    const file = fileType === 'pdf' ? selectedFile : selectedDocxFile;
+    if (!file) return null;
+
+    const fileExt = fileType;
+    const fileName = `${publicationId}_${fileType}.${fileType}`;
     const filePath = fileName;
 
     const { error } = await supabase.storage
       .from('publications')
-      .upload(filePath, selectedFile, {
+      .upload(filePath, file, {
         cacheControl: '3600',
         upsert: true
       });
@@ -116,10 +141,10 @@ export const NewPublication: React.FC = () => {
       return;
     }
 
-    if (action === 'publish' && !selectedFile) {
+    if (action === 'publish' && (!selectedFile || !selectedDocxFile)) {
       toast({
-        title: 'Arquivo obrigatório',
-        description: 'Por favor, selecione um arquivo PDF para publicar.',
+        title: 'Arquivos obrigatórios',
+        description: 'Por favor, selecione os arquivos PDF e DOCX para publicar.',
         variant: 'destructive',
       });
       return;
@@ -159,28 +184,49 @@ export const NewPublication: React.FC = () => {
         return;
       }
 
-      // Upload file if provided
+      // Upload files if provided
       let filePath = null;
+      let docxFilePath = null;
+      
       if (selectedFile) {
         try {
-          filePath = await uploadFile(publication.id);
-          
-          // Update publication with file path
-          const { error: updateError } = await supabase
-            .from('publications')
-            .update({ file_path: filePath })
-            .eq('id', publication.id);
-
-          if (updateError) {
-            console.error('Error updating file path:', updateError);
-          }
+          filePath = await uploadFile(publication.id, 'pdf');
         } catch (fileError) {
-          console.error('File upload error:', fileError);
+          console.error('PDF upload error:', fileError);
           toast({
-            title: 'Erro no upload',
-            description: 'Publicação criada, mas erro ao fazer upload do arquivo.',
+            title: 'Erro no upload do PDF',
+            description: 'Publicação criada, mas erro ao fazer upload do arquivo PDF.',
             variant: 'destructive',
           });
+        }
+      }
+      
+      if (selectedDocxFile) {
+        try {
+          docxFilePath = await uploadFile(publication.id, 'docx');
+        } catch (fileError) {
+          console.error('DOCX upload error:', fileError);
+          toast({
+            title: 'Erro no upload do DOCX',
+            description: 'Publicação criada, mas erro ao fazer upload do arquivo DOCX.',
+            variant: 'destructive',
+          });
+        }
+      }
+      
+      // Update publication with file paths
+      if (filePath || docxFilePath) {
+        const updateData: any = {};
+        if (filePath) updateData.file_path = filePath;
+        if (docxFilePath) updateData.docx_file_path = docxFilePath;
+        
+        const { error: updateError } = await supabase
+          .from('publications')
+          .update(updateData)
+          .eq('id', publication.id);
+
+        if (updateError) {
+          console.error('Error updating file paths:', updateError);
         }
       }
 
@@ -314,30 +360,59 @@ export const NewPublication: React.FC = () => {
               </Button>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="file">Arquivo PDF *</Label>
-              <div className="border-2 border-dashed border-border rounded-lg p-6">
-                <input
-                  type="file"
-                  id="file"
-                  accept=".pdf"
-                  onChange={handleFileChange}
-                  className="hidden"
-                />
-                <label
-                  htmlFor="file"
-                  className="cursor-pointer flex flex-col items-center justify-center space-y-2"
-                >
-                  <Upload className="h-8 w-8 text-muted-foreground" />
-                  <div className="text-center">
-                    <p className="text-sm font-medium">
-                      {selectedFile ? selectedFile.name : 'Clique para selecionar um arquivo PDF'}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Máximo 1MB
-                    </p>
-                  </div>
-                </label>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="file">Arquivo PDF *</Label>
+                <div className="border-2 border-dashed border-border rounded-lg p-6">
+                  <input
+                    type="file"
+                    id="file"
+                    accept=".pdf"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                  <label
+                    htmlFor="file"
+                    className="cursor-pointer flex flex-col items-center justify-center space-y-2"
+                  >
+                    <Upload className="h-8 w-8 text-muted-foreground" />
+                    <div className="text-center">
+                      <p className="text-sm font-medium">
+                        {selectedFile ? selectedFile.name : 'Clique para selecionar um arquivo PDF'}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Máximo 1MB
+                      </p>
+                    </div>
+                  </label>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="docx-file">Arquivo DOCX *</Label>
+                <div className="border-2 border-dashed border-border rounded-lg p-6">
+                  <input
+                    type="file"
+                    id="docx-file"
+                    accept=".docx"
+                    onChange={handleDocxFileChange}
+                    className="hidden"
+                  />
+                  <label
+                    htmlFor="docx-file"
+                    className="cursor-pointer flex flex-col items-center justify-center space-y-2"
+                  >
+                    <Upload className="h-8 w-8 text-muted-foreground" />
+                    <div className="text-center">
+                      <p className="text-sm font-medium">
+                        {selectedDocxFile ? selectedDocxFile.name : 'Clique para selecionar um arquivo DOCX'}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Máximo 1MB
+                      </p>
+                    </div>
+                  </label>
+                </div>
               </div>
             </div>
 
