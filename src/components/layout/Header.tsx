@@ -40,11 +40,12 @@ export const Header: React.FC = () => {
             alt="Logo" 
             className="h-10 w-10 text-primary"
           />
-          <div className="hidden sm:block">
-            <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+          <div className="block">
+            <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent sm:text-xl text-base">
               Vitrine Científica
             </h1>
-            <p className="text-xs text-muted-foreground">UFPE - CAA</p>
+            <p className="text-xs text-muted-foreground hidden sm:block">UFPE - CAA</p>
+            <p className="text-[10px] text-muted-foreground sm:hidden">UFPE - CAA</p>
           </div>
         </Link>
 

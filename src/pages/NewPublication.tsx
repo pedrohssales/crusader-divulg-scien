@@ -63,10 +63,10 @@ export const NewPublication: React.FC = () => {
         });
         return;
       }
-      if (file.size > 10 * 1024 * 1024) { // 10MB limit
+      if (file.size > 1 * 1024 * 1024) { // 1MB limit
         toast({
           title: 'Arquivo muito grande',
-          description: 'O arquivo PDF deve ter no máximo 10MB.',
+          description: 'O arquivo PDF deve ter no máximo 1MB.',
           variant: 'destructive',
         });
         return;
@@ -334,22 +334,23 @@ export const NewPublication: React.FC = () => {
                       {selectedFile ? selectedFile.name : 'Clique para selecionar um arquivo PDF'}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      Máximo 10MB
+                      Máximo 1MB
                     </p>
                   </div>
                 </label>
               </div>
             </div>
 
-            <div className="flex items-center justify-between pt-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pt-4 space-y-4 sm:space-y-0">
               <div className="text-sm text-muted-foreground">
                 * Campos obrigatórios
               </div>
-              <div className="flex space-x-2">
+              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 w-full sm:w-auto">
                 <Button
                   variant="outline"
                   onClick={() => handleSubmit('draft')}
                   disabled={isLoading}
+                  className="w-full sm:w-auto"
                 >
                   <Save className="h-4 w-4 mr-2" />
                   Salvar Rascunho
@@ -357,6 +358,7 @@ export const NewPublication: React.FC = () => {
                 <Button
                   onClick={() => handleSubmit('publish')}
                   disabled={isLoading}
+                  className="w-full sm:w-auto"
                 >
                   <Send className="h-4 w-4 mr-2" />
                   {profile?.user_type === 'admin' ? 'Publicar' : 'Enviar para Aprovação'}

@@ -325,7 +325,7 @@ export const PublicationDetail: React.FC = () => {
         </div>
 
         {/* PDF Viewer */}
-        {publication.file_path ? (
+        {publication.file_path && (publication.status === 'approved' || profile?.user_type === 'admin' || publication.profiles?.user_id === user?.id) ? (
           <Card className="mb-8">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
@@ -356,7 +356,12 @@ export const PublicationDetail: React.FC = () => {
             <CardContent className="p-6">
               <div className="text-center text-muted-foreground">
                 <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>Nenhum arquivo PDF disponível para esta publicação.</p>
+                <p>
+                  {publication.file_path 
+                    ? 'O arquivo PDF não está disponível para visualização.' 
+                    : 'Nenhum arquivo PDF disponível para esta publicação.'
+                  }
+                </p>
               </div>
             </CardContent>
           </Card>

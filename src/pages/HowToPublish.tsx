@@ -161,31 +161,35 @@ export const HowToPublish: React.FC = () => {
             {steps.map((step, index) => (
               <Card key={step.number} className="relative">
                 <CardHeader>
-                  <div className="flex items-center space-x-4">
-                    <div className="flex-shrink-0">
-                      <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white font-bold">
-                        {step.number}
+                  <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                    <div className="flex items-center space-x-4 flex-1">
+                      <div className="flex-shrink-0">
+                        <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white font-bold">
+                          {step.number}
+                        </div>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <CardTitle className="flex items-center space-x-2 text-lg sm:text-xl">
+                          <step.icon className="h-5 w-5 flex-shrink-0" />
+                          <span className="truncate">{step.title}</span>
+                        </CardTitle>
+                        <p className="text-muted-foreground text-sm">{step.description}</p>
                       </div>
                     </div>
-                    <div className="flex-1">
-                      <CardTitle className="flex items-center space-x-2">
-                        <step.icon className="h-5 w-5" />
-                        <span>{step.title}</span>
-                      </CardTitle>
-                      <p className="text-muted-foreground">{step.description}</p>
-                    </div>
                     {step.link && (
-                      <Button asChild>
-                        <Link to={step.link}>
-                          {step.action}
-                          <ArrowRight className="h-4 w-4 ml-2" />
-                        </Link>
-                      </Button>
+                      <div className="w-full sm:w-auto">
+                        <Button asChild className="w-full sm:w-auto">
+                          <Link to={step.link}>
+                            {step.action}
+                            <ArrowRight className="h-4 w-4 ml-2" />
+                          </Link>
+                        </Button>
+                      </div>
                     )}
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <ul className="space-y-2 ml-16">
+                  <ul className="space-y-2 ml-0 sm:ml-16">
                     {step.details.map((detail, i) => (
                       <li key={i} className="flex items-start space-x-2">
                         <CheckCircle className="h-4 w-4 mt-0.5 text-green-600 flex-shrink-0" />
@@ -195,7 +199,7 @@ export const HowToPublish: React.FC = () => {
                   </ul>
                 </CardContent>
                 {index < steps.length - 1 && (
-                  <div className="absolute left-6 bottom-0 w-0.5 h-6 bg-border translate-y-full"></div>
+                  <div className="absolute left-6 bottom-0 w-0.5 h-6 bg-border translate-y-full hidden sm:block"></div>
                 )}
               </Card>
             ))}
