@@ -251,11 +251,11 @@ export const AdminReview: React.FC = () => {
                 {publication.file_path ? (
                   <div className="border rounded-lg overflow-hidden bg-background">
                     <iframe
-                      src={`https://byhpptibkfffcvlhlsjp.supabase.co/storage/v1/object/public/publications/${publication.file_path}`}
+                      src={`https://byhpptibkfffcvlhlsjp.supabase.co/storage/v1/object/public/publications/${publication.file_path}#toolbar=1&navpanes=1&scrollbar=1`}
                       className="w-full h-96"
                       title="Visualizar PDF"
                     />
-                    <div className="p-3 border-t bg-muted/50">
+                    <div className="p-3 border-t bg-muted/50 flex justify-between items-center">
                       <a
                         href={`https://byhpptibkfffcvlhlsjp.supabase.co/storage/v1/object/public/publications/${publication.file_path}`}
                         target="_blank"
@@ -264,6 +264,15 @@ export const AdminReview: React.FC = () => {
                       >
                         Abrir PDF em nova aba
                       </a>
+                      {publication.docx_file_path && (
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => window.open(`https://byhpptibkfffcvlhlsjp.supabase.co/storage/v1/object/public/publications/${publication.docx_file_path}`, '_blank')}
+                        >
+                          Download DOCX
+                        </Button>
+                      )}
                     </div>
                   </div>
                 ) : (

@@ -173,10 +173,7 @@ export const PublicationDetail: React.FC = () => {
   };
 
   const getPublicUrl = (filePath: string) => {
-    const { data } = supabase.storage
-      .from('publications')
-      .getPublicUrl(filePath);
-    return data.publicUrl;
+    return `https://byhpptibkfffcvlhlsjp.supabase.co/storage/v1/object/public/publications/${filePath}`;
   };
 
   const viewPDF = () => {
