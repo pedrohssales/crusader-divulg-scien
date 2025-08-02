@@ -103,8 +103,8 @@ export const NewPublication: React.FC = () => {
     const file = fileType === 'pdf' ? selectedFile : selectedDocxFile;
     if (!file) return null;
 
-    const fileExt = fileType;
-    const fileName = `${publicationId}_${fileType}.${fileType}`;
+    const fileExt = fileType === 'pdf' ? 'pdf' : 'docx';
+    const fileName = `${publicationId}_${fileType}.${fileExt}`;
     const filePath = fileName;
 
     const { error } = await supabase.storage
