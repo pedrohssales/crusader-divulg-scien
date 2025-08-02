@@ -196,7 +196,9 @@ export const NewPublication: React.FC = () => {
       
       if (selectedFile) {
         try {
+          console.log('Starting PDF upload...');
           filePath = await uploadFile(publication.id, 'pdf');
+          console.log('PDF upload result:', filePath);
         } catch (fileError) {
           console.error('PDF upload error:', fileError);
           toast({
@@ -209,7 +211,9 @@ export const NewPublication: React.FC = () => {
       
       if (selectedDocxFile) {
         try {
+          console.log('Starting DOCX upload...');
           docxFilePath = await uploadFile(publication.id, 'docx');
+          console.log('DOCX upload result:', docxFilePath);
         } catch (fileError) {
           console.error('DOCX upload error:', fileError);
           toast({
@@ -220,11 +224,15 @@ export const NewPublication: React.FC = () => {
         }
       }
       
+      console.log('File paths before update:', { filePath, docxFilePath });
+      
       // Update publication with file paths
       if (filePath || docxFilePath) {
         const updateData: any = {};
         if (filePath) updateData.file_path = filePath;
         if (docxFilePath) updateData.docx_file_path = docxFilePath;
+        
+        console.log('Updating publication with data:', updateData);
         
         const { error: updateError } = await supabase
           .from('publications')
@@ -233,6 +241,8 @@ export const NewPublication: React.FC = () => {
 
         if (updateError) {
           console.error('Error updating file paths:', updateError);
+        } else {
+          console.log('File paths updated successfully');
         }
       }
 
