@@ -101,13 +101,18 @@ export const NewPublication: React.FC = () => {
 
   const uploadFile = async (publicationId: string, fileType: 'pdf' | 'docx'): Promise<string | null> => {
     const file = fileType === 'pdf' ? selectedFile : selectedDocxFile;
-    if (!file) return null;
+    if (!file) {
+      console.log(`No ${fileType} file selected`);
+      return null;
+    }
 
     const fileExt = fileType === 'pdf' ? 'pdf' : 'docx';
     const fileName = `${publicationId}_${fileType}.${fileExt}`;
     const filePath = fileName;
 
-    const { error } = await supabase.storage
+    console.log(`Uploading ${fileType} file:`, { fileName, filePath, fileSize: file.size });
+
+    const { error, data } = await supabase.storage
       .from('publications')
       .upload(filePath, file, {
         cacheControl: '3600',
@@ -115,10 +120,11 @@ export const NewPublication: React.FC = () => {
       });
 
     if (error) {
-      console.error('Error uploading file:', error);
+      console.error(`Error uploading ${fileType} file:`, error);
       throw error;
     }
 
+    console.log(`${fileType} file uploaded successfully:`, data);
     return filePath;
   };
 
