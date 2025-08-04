@@ -6,20 +6,11 @@ import { Publication } from '@/types/database';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 import { Eye, ArrowRight, AlertTriangle, BarChart3 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
 
 export const AdminPanel: React.FC = () => {
   const { user, profile } = useAuth();
@@ -27,7 +18,6 @@ export const AdminPanel: React.FC = () => {
   const [publications, setPublications] = useState<Publication[]>([]);
   const [retainedCount, setRetainedCount] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [selectedPublication, setSelectedPublication] = useState<Publication | null>(null);
 
   // Redirect if not admin
   React.useEffect(() => {
@@ -218,32 +208,16 @@ export const AdminPanel: React.FC = () => {
                       </div>
                     </div>
                     <div className="flex items-center space-x-2 ml-4">
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setSelectedPublication(publication)}
-                          >
-                            <Eye className="h-4 w-4 mr-2" />
-                            Visualizar
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-                          <DialogHeader>
-                            <DialogTitle>{publication.title}</DialogTitle>
-                          </DialogHeader>
-                          <div className="space-y-4">
-                            <div className="bg-muted/50 rounded-lg p-4">
-                              <p className="text-sm font-medium mb-2">Resumo:</p>
-                              <p className="text-muted-foreground">{publication.summary}</p>
-                            </div>
-                            <div className="prose prose-sm max-w-none">
-                              <div dangerouslySetInnerHTML={{ __html: publication.content }} />
-                            </div>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        asChild
+                      >
+                        <Link to={`/publicacao/${publication.id}`}>
+                          <Eye className="h-4 w-4 mr-2" />
+                          Visualizar
+                        </Link>
+                      </Button>
                       <Button asChild>
                         <Link to={`/admin/revisar/${publication.id}`}>
                           <ArrowRight className="h-4 w-4 mr-2" />
