@@ -355,9 +355,9 @@ export const PublicationDetail: React.FC = () => {
                 </div>
                 
                 {/* Embed PDF viewer */}
-                <div className="w-full h-96 border rounded-lg overflow-hidden">
+                <div className="w-full h-[600px] border rounded-lg overflow-hidden">
                   <iframe
-                    src={`${getPublicUrl(publication.file_path)}#toolbar=1&navpanes=1&scrollbar=1`}
+                    src={`${getPublicUrl(publication.file_path)}#toolbar=1&navpanes=0&scrollbar=1&view=FitH`}
                     className="w-full h-full"
                     title="PDF Viewer"
                   />
