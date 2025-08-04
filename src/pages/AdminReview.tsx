@@ -252,7 +252,7 @@ export const AdminReview: React.FC = () => {
                   <div className="border rounded-lg overflow-hidden bg-background">
                     <iframe
                       src={`https://byhpptibkfffcvlhlsjp.supabase.co/storage/v1/object/public/publications/${publication.file_path}#toolbar=1&navpanes=1&scrollbar=1`}
-                      className="w-full h-96"
+                      className="w-full h-[600px]"
                       title="Visualizar PDF"
                     />
                     <div className="p-3 border-t bg-muted/50 flex justify-between items-center">
