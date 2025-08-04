@@ -26,6 +26,7 @@ export const EditPublication: React.FC = () => {
   });
   const [additionalAuthors, setAdditionalAuthors] = useState<string[]>(['']);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedDocxFile, setSelectedDocxFile] = useState<File | null>(null);
 
   // Redirect if not authenticated
   React.useEffect(() => {
@@ -149,6 +150,51 @@ export const EditPublication: React.FC = () => {
     }
   };
 
+  const handleDocxFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (!file.type.includes('officedocument.wordprocessingml.document') && !file.name.endsWith('.docx')) {
+        toast({
+          title: 'Arquivo inválido',
+          description: 'Por favor, selecione apenas arquivos DOCX.',
+          variant: 'destructive',
+        });
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) { // 10MB limit
+        toast({
+          title: 'Arquivo muito grande',
+          description: 'O arquivo DOCX deve ter no máximo 10MB.',
+          variant: 'destructive',
+        });
+        return;
+      }
+      setSelectedDocxFile(file);
+    }
+  };
+
+  const uploadDocxFile = async (publicationId: string): Promise<string | null> => {
+    if (!selectedDocxFile) return null;
+
+    const fileExt = 'docx';
+    const fileName = `${publicationId}_${fileExt}.${fileExt}`;
+    const filePath = fileName;
+
+    const { error } = await supabase.storage
+      .from('publications')
+      .upload(filePath, selectedDocxFile, {
+        cacheControl: '3600',
+        upsert: true
+      });
+
+    if (error) {
+      console.error('Error uploading DOCX file:', error);
+      throw error;
+    }
+
+    return filePath;
+  };
+
   const uploadFile = async (publicationId: string): Promise<string | null> => {
     if (!selectedFile) return null;
 
@@ -207,8 +253,9 @@ export const EditPublication: React.FC = () => {
         : 'draft';
 
       let filePath = publication.file_path;
+      let docxFilePath = publication.docx_file_path;
 
-      // Upload new file if provided
+      // Upload new PDF file if provided
       if (selectedFile) {
         try {
           filePath = await uploadFile(publication.id);
@@ -216,7 +263,22 @@ export const EditPublication: React.FC = () => {
           console.error('File upload error:', fileError);
           toast({
             title: 'Erro no upload',
-            description: 'Erro ao fazer upload do arquivo.',
+            description: 'Erro ao fazer upload do arquivo PDF.',
+            variant: 'destructive',
+          });
+          return;
+        }
+      }
+
+      // Upload new DOCX file if provided
+      if (selectedDocxFile) {
+        try {
+          docxFilePath = await uploadDocxFile(publication.id);
+        } catch (fileError) {
+          console.error('DOCX upload error:', fileError);
+          toast({
+            title: 'Erro no upload',
+            description: 'Erro ao fazer upload do arquivo DOCX.',
             variant: 'destructive',
           });
           return;
@@ -228,6 +290,7 @@ export const EditPublication: React.FC = () => {
         summary: formData.summary.trim(),
         keywords: formData.keywords.trim() || null,
         file_path: filePath,
+        docx_file_path: docxFilePath,
         status,
         published_at: status === 'approved' ? new Date().toISOString() : null,
       };
@@ -429,6 +492,38 @@ export const EditPublication: React.FC = () => {
                   <div className="text-center">
                     <p className="text-sm font-medium">
                       {selectedFile ? selectedFile.name : 'Clique para selecionar um novo arquivo PDF'}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Máximo 10MB
+                    </p>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="docxFile">Arquivo DOCX (opcional)</Label>
+              {publication?.docx_file_path && (
+                <p className="text-sm text-muted-foreground mb-2">
+                  Arquivo atual: {publication.docx_file_path}
+                </p>
+              )}
+              <div className="border-2 border-dashed border-border rounded-lg p-6">
+                <input
+                  type="file"
+                  id="docxFile"
+                  accept=".docx"
+                  onChange={handleDocxFileChange}
+                  className="hidden"
+                />
+                <label
+                  htmlFor="docxFile"
+                  className="cursor-pointer flex flex-col items-center justify-center space-y-2"
+                >
+                  <Upload className="h-8 w-8 text-muted-foreground" />
+                  <div className="text-center">
+                    <p className="text-sm font-medium">
+                      {selectedDocxFile ? selectedDocxFile.name : 'Clique para selecionar um arquivo DOCX'}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       Máximo 10MB

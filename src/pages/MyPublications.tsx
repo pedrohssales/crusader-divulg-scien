@@ -244,14 +244,12 @@ export const MyPublications: React.FC = () => {
                       </p>
                     </div>
                     <div className="flex items-center space-x-2 ml-4">
-                      {publication.status === 'approved' && (
-                        <Button asChild variant="outline" size="sm">
-                          <Link to={`/publicacao/${publication.id}`}>
-                            <Eye className="h-4 w-4 mr-2" />
-                            Ver
-                          </Link>
-                        </Button>
-                      )}
+                      <Button asChild variant="outline" size="sm">
+                        <Link to={`/publicacao/${publication.id}`}>
+                          <Eye className="h-4 w-4 mr-2" />
+                          Ver
+                        </Link>
+                      </Button>
                       {(publication.status === 'draft' || publication.status === 'returned') && (
                         <Button asChild variant="outline" size="sm">
                           <Link to={`/editar-publicacao/${publication.id}`}>
