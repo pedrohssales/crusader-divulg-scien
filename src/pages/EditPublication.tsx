@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Publication } from '@/types/database';
+import { Publication, PublicationReview, Profile } from '@/types/database';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -11,6 +11,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 import { Send, Save, Upload, Plus, X } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { formatDistanceToNow } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+
+interface ReviewWithProfile extends PublicationReview {
+  profiles?: Profile;
+}
 
 export const EditPublication: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -27,6 +34,7 @@ export const EditPublication: React.FC = () => {
   const [additionalAuthors, setAdditionalAuthors] = useState<string[]>(['']);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedDocxFile, setSelectedDocxFile] = useState<File | null>(null);
+  const [latestReview, setLatestReview] = useState<ReviewWithProfile | null>(null);
 
   // Redirect if not authenticated
   React.useEffect(() => {
@@ -91,6 +99,11 @@ export const EditPublication: React.FC = () => {
       if (authors && authors.length > 0) {
         setAdditionalAuthors([...authors.map(a => a.author_name), '']);
       }
+
+      // Fetch latest review if publication was returned
+      if (data.status === 'returned') {
+        await fetchLatestReview();
+      }
     } catch (error) {
       console.error('Error:', error);
       toast({
@@ -101,6 +114,32 @@ export const EditPublication: React.FC = () => {
       navigate('/minhas-publicacoes');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchLatestReview = async () => {
+    if (!id) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('publication_reviews')
+        .select(`
+          *,
+          profiles (*)
+        `)
+        .eq('publication_id', id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (error) {
+        console.error('Error fetching latest review:', error);
+        return;
+      }
+
+      setLatestReview(data);
+    } catch (error) {
+      console.error('Error:', error);
     }
   };
 
@@ -532,6 +571,36 @@ export const EditPublication: React.FC = () => {
                 </label>
               </div>
             </div>
+
+            {/* Latest Review Feedback for Returned Publications */}
+            {latestReview && publication?.status === 'returned' && (
+              <Card className="border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-950/50">
+                <CardHeader>
+                  <CardTitle className="text-lg text-yellow-800 dark:text-yellow-200">
+                    Ajustes Solicitados
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                        Devolvido
+                      </Badge>
+                      <span className="text-sm text-muted-foreground">
+                        {formatDistanceToNow(new Date(latestReview.created_at), {
+                          addSuffix: true,
+                          locale: ptBR,
+                        })} por {latestReview.profiles?.display_name || 'Administrador'}
+                      </span>
+                    </div>
+                    <div className="bg-background rounded-lg p-4 border">
+                      <p className="text-sm font-medium mb-2">Justificativa:</p>
+                      <p className="text-sm text-muted-foreground">{latestReview.justification}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             <div className="flex items-center justify-between pt-4">
               <div className="text-sm text-muted-foreground">
