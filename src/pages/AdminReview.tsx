@@ -2,7 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Publication } from '@/types/database';
+import { Publication, PublicationReview, Profile } from '@/types/database';
+
+interface ReviewWithProfile extends PublicationReview {
+  profiles?: Profile;
+}
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -36,6 +40,7 @@ export const AdminReview: React.FC = () => {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
   const [publication, setPublication] = useState<Publication | null>(null);
+  const [reviews, setReviews] = useState<ReviewWithProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [justification, setJustification] = useState('');
@@ -90,6 +95,7 @@ export const AdminReview: React.FC = () => {
       }
 
       setPublication(data);
+      await fetchReviews();
     } catch (error) {
       console.error('Error:', error);
       toast({
@@ -100,6 +106,56 @@ export const AdminReview: React.FC = () => {
       navigate('/admin');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchReviews = async () => {
+    if (!id) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('publication_reviews')
+        .select(`
+          *,
+          profiles (*)
+        `)
+        .eq('publication_id', id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching reviews:', error);
+        return;
+      }
+
+      setReviews(data || []);
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'approved':
+        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      case 'rejected':
+        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      case 'returned':
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+      default:
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'approved':
+        return 'Aprovado';
+      case 'rejected':
+        return 'Rejeitado';
+      case 'returned':
+        return 'Devolvido';
+      default:
+        return status;
     }
   };
 
@@ -283,6 +339,43 @@ export const AdminReview: React.FC = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* Review History */}
+          {reviews.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Histórico de Revisões</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {reviews.map((review) => (
+                    <div key={review.id} className="border rounded-lg p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <Badge className={getStatusColor(review.decision)}>
+                            {getStatusText(review.decision)}
+                          </Badge>
+                          <span className="text-sm text-muted-foreground">
+                            por {review.profiles?.display_name || 'Administrador'}
+                          </span>
+                        </div>
+                        <span className="text-sm text-muted-foreground">
+                          {formatDistanceToNow(new Date(review.created_at), {
+                            addSuffix: true,
+                            locale: ptBR,
+                          })}
+                        </span>
+                      </div>
+                      <div className="bg-muted/50 rounded-lg p-3">
+                        <p className="text-sm font-medium mb-1">Justificativa:</p>
+                        <p className="text-sm text-muted-foreground">{review.justification}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Review Actions */}
           <Card>
